@@ -1,0 +1,519 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Événement{% endblock %}
+
+{% block css %}
+    {{ parent() }}
+    <style>
+        .event-form-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin: 30px auto;
+        }
+        
+        .event-form-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 25px;
+            margin-top: -25px;
+            margin-left: -25px;
+            margin-right: -25px;
+        }
+        
+        .event-form-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background-color: #3d8b40;
+        }
+        
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .btn-back:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-back i {
+            margin-right: 5px;
+        }
+        
+        .form-required {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+        
+        .date-time-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .date-time-group > div {
+            flex: 1;
+        }
+        
+        .help-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .category-select {
+            padding: 10px 12px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            width: 100%;
+            background-color: white;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        
+        .form-date-wrapper {
+            position: relative;
+        }
+        
+        .date-validation-msg {
+            display: none;
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            font-size: 0.75rem;
+            color: #28a745;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="event-form-container">
+        <div class="event-form-header">
+            <h1><i class="fas fa-calendar-plus mr-2"></i> Create a New Event</h1>
+        </div>
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i> Dates must be valid. The start date must be later than today, and the end date must be after the start date.
+        </div>
+        
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation event-form', 'id': 'event-form'}}) }}
+        
+        <div class="form-group">
+            <label class="form-label">
+                Event Name<span class="form-required">*</span>
+            </label>
+            {{ form_widget(form.eventName, {'attr': {'class': 'form-control' ~ (form.eventName.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Enter the event name'}}) }}
+            {% if not form.eventName.vars.valid %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.eventName) }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                Description<span class="form-required">*</span>
+            </label>
+            {{ form_widget(form.eventDescription, {'attr': {'class': 'form-control' ~ (form.eventDescription.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Describe your event (minimum 10 characters)'}}) }}
+            {% if not form.eventDescription.vars.valid %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.eventDescription) }}
+                </div>
+            {% endif %}
+            <div class="help-text">
+                Describe your event in detail to help participants understand its content and structure.
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">
+                        Start Date & Time<span class="form-required">*</span>
+                    </label>
+                    <div class="form-date-wrapper">
+                        {{ form_widget(form.startDate, {
+                            'attr': {
+                                'class': 'form-control datetime-picker' ~ (form.startDate.vars.valid ? '' : ' is-invalid'),
+                                'required': 'required',
+                                'data-min-date': 'today',
+                                'data-max-date': '+1y'
+                            }
+                        }) }}
+                        <span class="date-validation-msg start-date-valid"><i class="fas fa-check"></i> Valid date</span>
+                        {% if not form.startDate.vars.valid %}
+                            <div class="invalid-feedback start-date-error">
+                                {{ form_errors(form.startDate) }}
+                            </div>
+                        {% else %}
+                            <div class="invalid-feedback start-date-error" style="display: none;">
+                                Please select a valid start date and time
+                            </div>
+                        {% endif %}
+                        <div class="help-text">
+                            Date must be in format YYYY-MM-DD HH:MM:SS and cannot be in the past
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">
+                        End Date & Time<span class="form-required">*</span>
+                    </label>
+                    <div class="form-date-wrapper">
+                        {{ form_widget(form.endDate, {
+                            'attr': {
+                                'class': 'form-control datetime-picker' ~ (form.endDate.vars.valid ? '' : ' is-invalid'),
+                                'required': 'required',
+                                'data-min-date': 'today',
+                                'data-max-date': '+1y'
+                            }
+                        }) }}
+                        <span class="date-validation-msg end-date-valid"><i class="fas fa-check"></i> Valid date</span>
+                        {% if not form.endDate.vars.valid %}
+                            <div class="invalid-feedback end-date-error">
+                                {{ form_errors(form.endDate) }}
+                            </div>
+                        {% else %}
+                            <div class="invalid-feedback end-date-error" style="display: none;">
+                                End date must be after the start date
+                            </div>
+                        {% endif %}
+                        <div class="help-text">
+                            Date must be in format YYYY-MM-DD HH:MM:SS and must be after the start date
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                Location<span class="form-required">*</span>
+            </label>
+            {{ form_widget(form.location, {'attr': {'class': 'form-control' ~ (form.location.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Address or venue name'}}) }}
+            {% if not form.location.vars.valid %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.location) }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">
+                Category<span class="form-required">*</span>
+            </label>
+            {{ form_widget(form.category, {'attr': {'class': 'category-select' ~ (form.category.vars.valid ? '' : ' is-invalid')}}) }}
+            {% if not form.category.vars.valid %}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.category) }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit" id="submit-event">
+                <i class="fas fa-save mr-1"></i> Save
+            </button>
+            <a href="{{ path('app_events_index') }}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to list
+            </a>
+        </div>
+        
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('event-form');
+            const startDateField = document.querySelector('input[name$="[startDate]"]');
+            const endDateField = document.querySelector('input[name$="[endDate]"]');
+            const submitButton = document.getElementById('submit-event');
+            
+            // Format de date accepté par le serveur
+            function formatDateForValidation(dateString) {
+                if (!dateString || dateString.trim() === '') return null;
+                
+                // Si c'est déjà au format correct, le retourner tel quel
+                if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(dateString)) {
+                    return dateString;
+                }
+                
+                // Sinon essayer de parser la date
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return null;
+                    
+                    // Format YYYY-MM-DD HH:MM:SS
+                    return date.getFullYear() + '-' + 
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(date.getDate()).padStart(2, '0') + ' ' + 
+                           String(date.getHours()).padStart(2, '0') + ':' + 
+                           String(date.getMinutes()).padStart(2, '0') + ':' + 
+                           String(date.getSeconds()).padStart(2, '0');
+                } catch (e) {
+                    return null;
+                }
+            }
+            
+            // Vérifier si une date est dans le passé
+            function isDateInPast(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                return date < now;
+            }
+            
+            // Validation de la date de début
+            function validateStartDate() {
+                const startDateValue = startDateField.value;
+                const formattedDate = formatDateForValidation(startDateValue);
+                
+                if (!formattedDate) {
+                    startDateField.classList.add('is-invalid');
+                    document.querySelector('.start-date-error').style.display = 'block';
+                    document.querySelector('.start-date-error').textContent = 'Please enter a valid date in the format YYYY-MM-DD HH:MM:SS';
+                    document.querySelector('.start-date-valid').style.display = 'none';
+                    return false;
+                }
+                
+                if (isDateInPast(formattedDate)) {
+                    startDateField.classList.add('is-invalid');
+                    document.querySelector('.start-date-error').style.display = 'block';
+                    document.querySelector('.start-date-error').textContent = 'Start date cannot be in the past';
+                    document.querySelector('.start-date-valid').style.display = 'none';
+                    return false;
+                }
+                
+                startDateField.classList.remove('is-invalid');
+                document.querySelector('.start-date-error').style.display = 'none';
+                document.querySelector('.start-date-valid').style.display = 'block';
+                return true;
+            }
+            
+            // Validation de la date de fin
+            function validateEndDate() {
+                const endDateValue = endDateField.value;
+                const startDateValue = startDateField.value;
+                const formattedEndDate = formatDateForValidation(endDateValue);
+                const formattedStartDate = formatDateForValidation(startDateValue);
+                
+                if (!formattedEndDate) {
+                    endDateField.classList.add('is-invalid');
+                    document.querySelector('.end-date-error').style.display = 'block';
+                    document.querySelector('.end-date-error').textContent = 'Please enter a valid date in the format YYYY-MM-DD HH:MM:SS';
+                    document.querySelector('.end-date-valid').style.display = 'none';
+                    return false;
+                }
+                
+                if (isDateInPast(formattedEndDate)) {
+                    endDateField.classList.add('is-invalid');
+                    document.querySelector('.end-date-error').style.display = 'block';
+                    document.querySelector('.end-date-error').textContent = 'End date cannot be in the past';
+                    document.querySelector('.end-date-valid').style.display = 'none';
+                    return false;
+                }
+                
+                if (formattedStartDate && new Date(formattedEndDate) <= new Date(formattedStartDate)) {
+                    endDateField.classList.add('is-invalid');
+                    document.querySelector('.end-date-error').style.display = 'block';
+                    document.querySelector('.end-date-error').textContent = 'End date must be after the start date';
+                    document.querySelector('.end-date-valid').style.display = 'none';
+                    return false;
+                }
+                
+                endDateField.classList.remove('is-invalid');
+                document.querySelector('.end-date-error').style.display = 'none';
+                document.querySelector('.end-date-valid').style.display = 'block';
+                return true;
+            }
+            
+            // Ajouter les événements de validation
+            if (startDateField && endDateField) {
+                // Validation à la saisie
+                startDateField.addEventListener('change', function() {
+                    validateStartDate();
+                    if (endDateField.value) validateEndDate();
+                });
+                
+                endDateField.addEventListener('change', function() {
+                    validateEndDate();
+                });
+                
+                // Validation au blur (sortie du champ)
+                startDateField.addEventListener('blur', function() {
+                    validateStartDate();
+                });
+                
+                endDateField.addEventListener('blur', function() {
+                    validateEndDate();
+                });
+                
+                // Validation à la soumission du formulaire
+                form.addEventListener('submit', function(event) {
+                    let isFormValid = true;
+                    
+                    // Valider les dates
+                    if (!validateStartDate()) isFormValid = false;
+                    if (!validateEndDate()) isFormValid = false;
+                    
+                    // Vérifier la description
+                    const descriptionField = document.querySelector('textarea[name$="[eventDescription]"]');
+                    if (descriptionField && descriptionField.value.length < 10) {
+                        descriptionField.classList.add('is-invalid');
+                        const errorMsg = document.createElement('div');
+                        errorMsg.classList.add('invalid-feedback');
+                        errorMsg.innerText = 'Description must be at least 10 characters long';
+                        
+                        // Éviter les doublons de messages d'erreur
+                        const existingError = descriptionField.nextElementSibling;
+                        if (existingError && existingError.classList.contains('invalid-feedback')) {
+                            existingError.textContent = errorMsg.innerText;
+                        } else {
+                            descriptionField.parentNode.insertBefore(errorMsg, descriptionField.nextElementSibling);
+                        }
+                        
+                        isFormValid = false;
+                    }
+                    
+                    // Si le formulaire n'est pas valide, empêcher la soumission
+                    if (!isFormValid) {
+                        event.preventDefault();
+                        
+                        // Scroll vers la première erreur
+                        const firstInvalid = form.querySelector('.is-invalid');
+                        if (firstInvalid) {
+                            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } else {
+                        // Formater correctement les dates avant soumission
+                        startDateField.value = formatDateForValidation(startDateField.value);
+                        endDateField.value = formatDateForValidation(endDateField.value);
+                    }
+                });
+            }
+            
+            // Initialiser avec une vérification au chargement
+            if (startDateField.value) validateStartDate();
+            if (endDateField.value) validateEndDate();
+            
+            // Simulation d'un sélecteur de date (si vous n'en avez pas déjà un)
+            // Vous pouvez remplacer ceci par une intégration avec un vrai date-picker comme flatpickr
+            function initDateTimeFields() {
+                const dateTimeFields = document.querySelectorAll('.datetime-picker');
+                dateTimeFields.forEach(field => {
+                    // Si vous n'utilisez pas déjà un date picker, assurez-vous que le placeholder indique le format
+                    field.setAttribute('placeholder', 'YYYY-MM-DD HH:MM:SS');
+                    
+                    // Si le champ est vide, définir la date actuelle comme valeur par défaut
+                    if (!field.value) {
+                        const now = new Date();
+                        // Ajouter 1 heure pour la date de début par défaut
+                        if (field === startDateField) {
+                            now.setHours(now.getHours() + 1);
+                        }
+                        // Ajouter 2 heures pour la date de fin par défaut
+                        if (field === endDateField) {
+                            now.setHours(now.getHours() + 2);
+                        }
+                        
+                        field.value = formatDateForValidation(now);
+                    }
+                });
+            }
+            
+            // Initialiser les champs de date/heure
+            initDateTimeFields();
+        });
+    </script>
+{% endblock %}

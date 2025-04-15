@@ -1,0 +1,75 @@
+<div class="table-responsive">
+    <table class="table table-events">
+        <thead>
+            <tr>
+                <th>{{ knp_pagination_sortable(events, 'ID', 'e.id') }}</th>
+                <th>{{ knp_pagination_sortable(events, 'Name', 'e.eventName') }}</th>
+                <th>Description</th>
+                <th>{{ knp_pagination_sortable(events, 'Start Date', 'e.startDate') }}</th>
+                <th>{{ knp_pagination_sortable(events, 'End Date', 'e.endDate') }}</th>
+                <th>{{ knp_pagination_sortable(events, 'Location', 'e.location') }}</th>
+                <th>{{ knp_pagination_sortable(events, 'Category', 'e.category') }}</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr>
+                <td>{{ event.id }}</td>
+                <td><strong>{{ event.eventName }}</strong></td>
+                <td class="event-description">{{ event.eventDescription }}</td>
+                <td>{{ event.startDate ? event.startDate|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ event.endDate ? event.endDate|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ event.location }}</td>
+                <td>
+                    <span class="badge bg-secondary text-white">{{ event.category }}</span>
+                </td>
+                <td>
+                    <div class="btn-actions">
+                        <a href="{{ path('app_events_show', {'id': event.id}) }}" class="btn btn-sm btn-view">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ path('app_events_edit', {'id': event.id}) }}" class="btn btn-sm btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deleteModal{{ event.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete the event "{{ event.eventName }}"?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <form method="post" action="{{ path('app_events_delete', {'id': event.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8" class="empty-state">
+                    <div>
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p>No events found. You can create a new one.</p>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

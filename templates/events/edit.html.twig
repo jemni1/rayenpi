@@ -1,0 +1,295 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un événement{% endblock %}
+
+{% block css %}
+    {{ parent() }}
+    <style>
+        .event-form-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin: 30px auto;
+        }
+
+        .event-form-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 25px;
+            margin-top: -25px;
+            margin-left: -25px;
+            margin-right: -25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-id-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .invalid-feedback {
+                display: none;
+
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: space-between;
+        }
+
+        .btn-update {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .form-required {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+
+        .category-select {
+            padding: 10px 12px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            width: 100%;
+            background-color: white;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="event-form-container">
+        <div class="event-form-header">
+            <h1>
+                <i class="fas fa-edit mr-2"></i> Edit Event
+                <span class="event-id-badge">ID: {{ event.id }}</span>
+            </h1>
+        </div>
+
+        <div class="alert">
+            Fill in all required fields before submitting.
+        </div>
+
+        {{ form_start(form, {'attr': {'id': 'event-form', 'novalidate': 'novalidate'}}) }}
+
+        <div class="form-group">
+            <label class="form-label">Nom de l'événement<span class="form-required">*</span></label>
+            {{ form_widget(form.eventName, {'attr': {'class': 'form-control'}}) }}
+            <div class="invalid-feedback">Name must be at least 3 characters long.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description<span class="form-required">*</span></label>
+            {{ form_widget(form.eventDescription, {'attr': {'class': 'form-control'}}) }}
+            <div class="invalid-feedback">Description must be at least 10 characters long.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Date de début<span class="form-required">*</span></label>
+            {{ form_widget(form.startDate, {'attr': {'class': 'form-control'}}) }}
+            <div class="invalid-feedback">Invalid or missing start date.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Date de fin<span class="form-required">*</span></label>
+            {{ form_widget(form.endDate, {'attr': {'class': 'form-control'}}) }}
+            <div class="invalid-feedback">End date must be after the start date.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Lieu<span class="form-required">*</span></label>
+            {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
+            <div class="invalid-feedback">Location is required.</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Catégorie<span class="form-required">*</span></label>
+            {{ form_widget(form.category, {'attr': {'class': 'category-select'}}) }}
+            <div class="invalid-feedback">Please select a category.</div>
+        </div>
+
+        <div class="buttons-container">
+            <button type="submit" class="btn-update">
+                <i class="fas fa-save btn-icon"></i> Update
+            </button>
+            <a href="{{ path('app_events_index') }}" class="btn-back">
+                <i class="fas fa-arrow-left btn-icon"></i> Back
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('event-form');
+
+        const name = form.querySelector('[name$="[eventName]"]');
+        const desc = form.querySelector('[name$="[eventDescription]"]');
+        const start = form.querySelector('[name$="[startDate]"]');
+        const end = form.querySelector('[name$="[endDate]"]');
+        const loc = form.querySelector('[name$="[location]"]');
+        const cat = form.querySelector('[name$="[category]"]');
+
+        // 👇 Cacher tous les feedbacks au départ
+        form.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+
+        function invalidate(field, message) {
+            field.classList.add('is-invalid');
+            const feedback = field.parentElement.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+            }
+        }
+
+        function clearInvalid(field) {
+            field.classList.remove('is-invalid');
+            const feedback = field.parentElement.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.style.display = 'none';
+            }
+        }
+
+        function isValidDate(value) {
+            return !isNaN(new Date(value).getTime());
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            // Nom
+            if (!name.value.trim() || name.value.length < 3) {
+                invalidate(name, 'Name must be at least 3 characters long.');
+                isValid = false;
+            } else {
+                clearInvalid(name);
+            }
+
+            // Description
+            if (!desc.value.trim() || desc.value.length < 10) {
+                invalidate(desc, 'Description must be at least 10 characters long.');
+                isValid = false;
+            } else {
+                clearInvalid(desc);
+            }
+
+            // Dates
+            const startDate = new Date(start.value);
+            const endDate = new Date(end.value);
+
+            if (!start.value || !isValidDate(start.value)) {
+                invalidate(start, 'Invalid or missing start date.');
+                isValid = false;
+            } else {
+                clearInvalid(start);
+            }
+
+            if (!end.value || !isValidDate(end.value) || endDate < startDate) {
+                invalidate(end, 'End date must be after the start date.');
+                isValid = false;
+            } else {
+                clearInvalid(end);
+            }
+
+            // Lieu
+            if (!loc.value.trim()) {
+                invalidate(loc, 'Location is required.');
+                isValid = false;
+            } else {
+                clearInvalid(loc);
+            }
+
+            // Catégorie
+            if (!cat.value || cat.value === '') {
+                invalidate(cat, 'Please select a category.');
+                isValid = false;
+            } else {
+                clearInvalid(cat);
+            }
+
+            return isValid;
+        }
+
+        form.addEventListener('submit', function (e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
