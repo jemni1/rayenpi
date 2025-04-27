@@ -11,6 +11,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Builder\BuilderInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 #[Route('/events')]
 final class EventsController extends AbstractController
 {   
@@ -71,11 +76,33 @@ final class EventsController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}', name: 'app_events_show', methods: ['GET'])]
-    public function show(Events $event): Response
+    public function show(Events $event, BuilderInterface $qrCodeBuilder): Response
     {
+        // Generate the event details as a QR code data string
+        $qrData = json_encode([
+            'name' => $event->getEventName(),
+            'description' => $event->getEventDescription(),
+            'start_date' => $event->getStartDate()->format('Y-m-d H:i:s'),
+            'end_date' => $event->getEndDate()->format('Y-m-d H:i:s'),
+            'location' => $event->getLocation(),
+            'category' => $event->getCategory(),
+        ]);
+    
+        // Generate the QR code
+        $qrCode = $qrCodeBuilder
+            ->data($qrData)
+            ->size(300)
+            ->margin(10)
+            ->build();
+    
+        // Generate the data URI for the QR code image
+        $qrCodeDataUri = $qrCode->getDataUri();
+    
         return $this->render('events/show.html.twig', [
             'event' => $event,
+            'qrCode' => $qrCodeDataUri,
         ]);
     }
 

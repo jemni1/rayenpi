@@ -23,6 +23,7 @@ class Events
     )]
     private ?string $eventName = null;
 
+
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Event description is required.")]
     #[Assert\Length(
@@ -52,7 +53,12 @@ class Events
         maxMessage: "Location cannot be longer than {{ limit }} characters."
     )]
     private ?string $location = null;
-
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $latitude = null;
+    
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $longitude = null;
+    
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Category is required.")]
     #[Assert\Length(
@@ -114,6 +120,27 @@ class Events
         return $this;
     }
 
+public function getLatitude(): ?string
+{
+    return $this->latitude;
+}
+
+public function setLatitude(?string $latitude): self
+{
+    $this->latitude = $latitude;
+    return $this;
+}
+
+public function getLongitude(): ?string
+{
+    return $this->longitude;
+}
+
+public function setLongitude(?string $longitude): self
+{
+    $this->longitude = $longitude;
+    return $this;
+}
     public function getLocation(): ?string
     {
         return $this->location;

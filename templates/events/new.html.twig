@@ -273,17 +273,32 @@
             </div>
         </div>
         
-        <div class="form-group">
-            <label class="form-label">
-                Location<span class="form-required">*</span>
-            </label>
-            {{ form_widget(form.location, {'attr': {'class': 'form-control' ~ (form.location.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Address or venue name'}}) }}
-            {% if not form.location.vars.valid %}
-                <div class="invalid-feedback">
-                    {{ form_errors(form.location) }}
-                </div>
-            {% endif %}
+{# Replace your current location form group with this #}
+<div class="form-group">
+    <label class="form-label">
+        Location<span class="form-required">*</span>
+    </label>
+    {{ form_widget(form.location, {'attr': {'class': 'form-control location-input' ~ (form.location.vars.valid ? '' : ' is-invalid'), 'readonly': 'readonly', 'placeholder': 'Select a location on the map'}}) }}
+    {% if not form.location.vars.valid %}
+        <div class="invalid-feedback">
+            {{ form_errors(form.location) }}
         </div>
+    {% endif %}
+    <div class="help-text mb-2">
+        Click on the map to select your event location or use the search box above the map.
+    </div>
+    
+    {# Add map container #}
+    <div id="map-container" style="height: 400px; width: 100%; border-radius: 4px; margin-bottom: 15px;"></div>
+    
+    {# Hidden fields for latitude and longitude #}
+    {{ form_widget(form.latitude, {'attr': {'class': 'latitude-input'}}) }}
+    {{ form_widget(form.longitude, {'attr': {'class': 'longitude-input'}}) }}
+    
+    <div id="location-error" class="invalid-feedback" style="display: none;">
+        Please select a location on the map
+    </div>
+</div>
         
         <div class="form-group">
             <label class="form-label">
@@ -515,5 +530,266 @@
             // Initialiser les champs de date/heure
             initDateTimeFields();
         });
+        document.addEventListener('DOMContentLoaded', function() {
+    // Récupération des éléments du DOM
+    const form = document.getElementById('event-form');
+    const mapContainer = document.getElementById('map-container');
+    const locationInput = document.querySelector('.location-input');
+    const latitudeInput = document.querySelector('.latitude-input');
+    const longitudeInput = document.querySelector('.longitude-input');
+    const locationError = document.getElementById('location-error');
+    let map, marker;
+
+    // Fonction pour initialiser la carte
+    function initMap() {
+        if (!mapContainer) {
+            console.error("Conteneur de carte introuvable");
+            return;
+        }
+        
+        console.log("Initialisation de la carte...");
+        
+        // Créer la carte avec vue par défaut sur Paris
+        map = L.map(mapContainer).setView([48.8566, 2.3522], 13);
+        
+        // Ajouter la couche de tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Ajouter le conteneur de recherche
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'map-search-container';
+        searchContainer.innerHTML = `
+            <input type="text" class="map-search-input" placeholder="Rechercher un lieu...">
+            <div class="search-results"></div>
+        `;
+        mapContainer.appendChild(searchContainer);
+        
+        const searchInput = searchContainer.querySelector('.map-search-input');
+        const searchResults = searchContainer.querySelector('.search-results');
+        
+        // Gérer la recherche
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 3) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchLocation(query);
+            }, 500);
+        });
+        
+        // Rechercher un lieu avec Nominatim (OpenStreetMap)
+        function searchLocation(query) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+            
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    displaySearchResults(data);
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item">Aucun résultat trouvé</div>';
+                    searchResults.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur de recherche:', error);
+                searchResults.innerHTML = '<div class="search-result-item">Erreur lors de la recherche</div>';
+                searchResults.style.display = 'block';
+            });
+        }
+        
+        // Afficher les résultats de recherche
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                resultItem.textContent = result.display_name;
+                
+                resultItem.addEventListener('click', function() {
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    const address = result.display_name;
+                    
+                    setMarker(lat, lng, address);
+                    map.setView([lat, lng], 15);
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
+                });
+                
+                searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // Gérer le clic sur la carte
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // Géocodage inverse pour obtenir l'adresse
+            reverseGeocode(lat, lng);
+        });
+        
+        // Géocodage inverse avec Nominatim
+        function reverseGeocode(lat, lng) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+            
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    setMarker(lat, lng, data.display_name);
+                } else {
+                    setMarker(lat, lng, `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur de géocodage inverse:', error);
+                setMarker(lat, lng, `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
+            });
+        }
+        
+        // Définir le marqueur et mettre à jour les champs du formulaire
+        function setMarker(lat, lng, address) {
+            // Supprimer le marqueur existant
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            // Ajouter un nouveau marqueur
+            marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(`<div class="map-marker-info">${address}</div>`).openPopup();
+            
+            // Mettre à jour les champs du formulaire
+            locationInput.value = address;
+            latitudeInput.value = lat;
+            longitudeInput.value = lng;
+            
+            // Effacer l'erreur s'il y en a
+            locationInput.classList.remove('is-invalid');
+            if (locationError) {
+                locationError.style.display = 'none';
+            }
+        }
+        
+        // Vérifier si nous avons déjà des données de localisation
+        if (locationInput.value && latitudeInput.value && longitudeInput.value) {
+            const lat = parseFloat(latitudeInput.value);
+            const lng = parseFloat(longitudeInput.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                setMarker(lat, lng, locationInput.value);
+                map.setView([lat, lng], 15);
+            }
+        }
+    }
+    
+    // Valider la localisation avant la soumission du formulaire
+    function validateLocation() {
+        if (!locationInput.value || !latitudeInput.value || !longitudeInput.value) {
+            locationInput.classList.add('is-invalid');
+            if (locationError) {
+                locationError.style.display = 'block';
+                locationError.textContent = 'Veuillez sélectionner un lieu sur la carte';
+            }
+            return false;
+        }
+        
+        locationInput.classList.remove('is-invalid');
+        if (locationError) {
+            locationError.style.display = 'none';
+        }
+        return true;
+    }
+    
+    // Modifier la validation existante du formulaire
+    if (form) {
+        const existingSubmitHandler = form.onsubmit;
+        
+        form.onsubmit = function(event) {
+            let isFormValid = true;
+            
+            // Exécuter la validation existante d'abord (si existante)
+            if (existingSubmitHandler) {
+                const originalPreventDefault = event.preventDefault;
+                event.preventDefault = function() {
+                    isFormValid = false;
+                    originalPreventDefault.call(event);
+                };
+                
+                existingSubmitHandler.call(this, event);
+                
+                // Restaurer le preventDefault original
+                event.preventDefault = originalPreventDefault;
+            }
+            
+            // Exécuter la validation de la localisation
+            if (!validateLocation()) {
+                isFormValid = false;
+            }
+            
+            // Si non valide, empêcher la soumission du formulaire
+            if (!isFormValid) {
+                event.preventDefault();
+                
+                // Faire défiler jusqu'à la première erreur
+                const firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        };
+    }
+    
+    // Charger Leaflet CSS et JS
+    function loadLeaflet() {
+        // Charger CSS
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        cssLink.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        cssLink.crossOrigin = '';
+        document.head.appendChild(cssLink);
+        
+        // Attendre un court instant pour s'assurer que le CSS est chargé
+        setTimeout(() => {
+            // Charger JS
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+            script.crossOrigin = '';
+            script.onload = initMap;
+            document.body.appendChild(script);
+        }, 100);
+    }
+    
+    // Initialiser tout
+    if (mapContainer) {
+        loadLeaflet();
+    } else {
+        console.error("Conteneur de carte non trouvé dans le DOM");
+    }
+});
     </script>
 {% endblock %}

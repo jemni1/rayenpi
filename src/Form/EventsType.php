@@ -6,6 +6,8 @@ use App\Entity\Events;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class EventsType extends AbstractType
 {
@@ -20,7 +22,20 @@ class EventsType extends AbstractType
             ->add('endDate', null, [
                 'widget' => 'single_text',
             ])
-            ->add('location')
+            ->add('location', TextType::class, [
+                'label' => 'Location',
+                'attr' => [
+                    'readonly' => true,
+                    'class' => 'form-control location-input',
+                    'placeholder' => 'Select a location on the map'
+                ]
+            ])
+            ->add('latitude', HiddenType::class, [
+                'required' => false,
+            ])
+            ->add('longitude', HiddenType::class, [
+                'required' => false,
+            ])         
             ->add('category')
         ;
     }
