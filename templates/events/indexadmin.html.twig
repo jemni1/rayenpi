@@ -1,0 +1,249 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Event Management{% endblock %}
+
+{% block css %}
+    {{ parent() }}
+    <style>
+        .events-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .events-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .events-header h1 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .table-events {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .table-events thead {
+            background-color: #e9ecef;
+        }
+
+        .table-events th {
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 15px;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .table-events td {
+            padding: 12px 15px;
+            border-top: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .table-events tbody tr:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .table-events tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .table-events .event-description {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-create {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 500;
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-create:hover {
+            background-color: #3d8b40;
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4 mb-5">
+    <div class="events-container">
+        <div class="events-header">
+            <h1><i class="fas fa-calendar-alt mr-2"></i> Event Management</h1>
+        </div>
+        <div class="mb-4">
+            <form method="get" action="{{ path('app_events_index') }}" class="d-flex">
+                <input type="text" name="search" class="form-control" placeholder="Search event by name" value="{{ searchQuery }}" />
+                <button type="submit" class="btn btn-primary ml-2">Search</button>
+            </form>
+        </div>
+        <div id="events-table-container">
+            <div class="table-responsive">
+                <table class="table table-events">
+                    <thead>
+                        <tr>
+                            <th>{{ knp_pagination_sortable(events, 'ID', 'e.id') }}</th>
+                            <th>{{ knp_pagination_sortable(events, 'Name', 'e.eventName') }}</th>
+                            <th>Description</th>
+                            <th>{{ knp_pagination_sortable(events, 'Start Date', 'e.startDate') }}</th>
+                            <th>{{ knp_pagination_sortable(events, 'End Date', 'e.endDate') }}</th>
+                            <th>{{ knp_pagination_sortable(events, 'Location', 'e.location') }}</th>
+                            <th>{{ knp_pagination_sortable(events, 'Category', 'e.category') }}</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                            <tr>
+                                <td>{{ event.id }}</td>
+                                <td><strong>{{ event.eventName }}</strong></td>
+                                <td class="event-description">{{ event.eventDescription }}</td>
+                                <td>{{ event.startDate ? event.startDate|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ event.endDate ? event.endDate|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ event.location }}</td>
+                                <td>
+                                    <span class="badge bg-secondary text-white">{{ event.category }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-actions">
+                                        <a href="{{ path('app_events_show', {'id': event.id}) }}" class="btn btn-sm btn-view">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_events_edit', {'id': event.id}) }}" class="btn btn-sm btn-edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+
+                                        <!-- Modal suppression -->
+                                        <div class="modal fade" id="deleteModal{{ event.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete the event "{{ event.eventName }}"?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form method="post" action="{{ path('app_events_delete', {'id': event.id}) }}">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <div>
+                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                        <p>No events found. You can create a new one.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="navigation mt-4">
+                {{ knp_pagination_render(events) }}
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ path('app_events_new') }}" class="btn-create">
+                <i class="fas fa-plus-circle mr-1"></i> Create New Event
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.querySelector('#events-table-container');
+
+            container.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+
+                if (link && (link.closest('th') || link.closest('.navigation'))) {
+                    e.preventDefault();
+
+                    fetch(link.href, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error("Erreur AJAX :", err);
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

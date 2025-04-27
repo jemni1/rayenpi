@@ -1,0 +1,196 @@
+{% extends 'basebackoffice.html.twig' %}
+
+{% block title %}Admin | Manage Events{% endblock %}
+
+{% block css %}
+    {{ parent() }}
+    <style>
+        .admin-container {
+            padding: 30px;
+            background-color: #f1f3f7;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .admin-header h2 {
+            font-weight: 700;
+            color: #343a40;
+        }
+
+        .admin-search-form input {
+            border-radius: 8px;
+        }
+
+        .admin-table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-table thead {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .admin-actions a, .admin-actions button {
+            margin: 0 2px;
+        }
+
+        .btn-create-event {
+            background-color: #007bff;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-create-event:hover {
+            background-color: #0056b3;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>Manage Events</h2>
+            <a href="{{ path('app_events_new') }}" class="btn-create-event">
+                <i class="fas fa-plus-circle"></i> Add Event
+            </a>
+        </div>
+
+        <form method="get" action="{{ path('admin_events_index') }}" class="mb-4 admin-search-form d-flex">
+            <input type="text" name="search" class="form-control" placeholder="Search events..." value="{{ searchQuery }}">
+            <button class="btn btn-dark ml-2" type="submit">Search</button>
+        </form>
+
+        <div id="admin-events-table">
+            <div class="table-responsive admin-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Location</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                            <tr>
+                                <td>{{ event.id }}</td>
+                                <td>{{ event.eventName }}</td>
+                                <td>{{ event.startDate ? event.startDate|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ event.endDate ? event.endDate|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ event.location }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ event.category }}</span>
+                                </td>
+                                <td class="admin-actions">
+                                    <a href="{{ path('admin_events_show', {'id': event.id}) }}" class="btn btn-sm btn-success" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_events_edit', {'id': event.id}) }}" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ event.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal{{ event.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete "<strong>{{ event.eventName }}</strong>"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form method="post" action="{{ path('app_events_delete', {'id': event.id}) }}">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-exclamation-circle fa-2x mb-3"></i><br>
+                                    No events found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                {{ knp_pagination_render(events) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.querySelector('#admin-events-table');
+
+            container.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (link && (link.closest('th') || link.closest('.pagination'))) {
+                    e.preventDefault();
+
+                    fetch(link.href, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                    })
+                    .catch(err => {
+                        console.error("AJAX error:", err);
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -19,6 +19,69 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/events')]
 final class EventsController extends AbstractController
 {   
+    #[Route('/admin/events/{id}', name: 'admin_events_show', methods: ['GET'])]
+    public function adminShow(Events $event, BuilderInterface $qrCodeBuilder): Response
+    {
+        // Generate the event details as a QR code data string
+        $qrData = json_encode([
+            'name' => $event->getEventName(),
+            'description' => $event->getEventDescription(),
+            'start_date' => $event->getStartDate()->format('Y-m-d H:i:s'),
+            'end_date' => $event->getEndDate()->format('Y-m-d H:i:s'),
+            'location' => $event->getLocation(),
+            'category' => $event->getCategory(),
+        ]);
+    
+        // Generate the QR code
+        $qrCode = $qrCodeBuilder
+            ->data($qrData)
+            ->size(300)
+            ->margin(10)
+            ->build();
+    
+        // Generate the data URI for the QR code image
+        $qrCodeDataUri = $qrCode->getDataUri();
+    
+        return $this->render('adminevent/show.html.twig', [
+            'event' => $event,
+            'qrCode' => $qrCodeDataUri,
+        ]);
+    }
+    
+
+
+    #[Route('/admin/events', name: 'admin_events_index', methods: ['GET'])]
+    public function adminIndex(Request $request, EventsRepository $eventsRepository, PaginatorInterface $paginator): Response
+    {
+        $searchQuery = $request->query->get('search', '');
+    
+        $query = $eventsRepository->createQueryBuilder('e');
+    
+        if (!empty($searchQuery)) {
+            $query->where('e.eventName LIKE :search')
+                  ->setParameter('search', '%' . $searchQuery . '%');
+        }
+    
+        $query->orderBy('e.startDate', 'DESC');
+    
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10
+        );
+    
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('adminevent/_table.html.twig', [
+                'events' => $pagination,
+            ]);
+        }
+    
+        return $this->render('adminevent/index.html.twig', [
+            'events' => $pagination,
+            'searchQuery' => $searchQuery,
+        ]);
+    }
+    
     #[Route(name: 'app_events_index', methods: ['GET'])]
     public function index(Request $request, EventsRepository $eventsRepository, PaginatorInterface $paginator): Response
     {
