@@ -115,6 +115,14 @@
                     <th><i class="fas fa-map-marker-alt me-2"></i>Lieu</th>
                     <td>{{ event.location }}</td>
                 </tr>
+                 <tr>
+    <th><i class="fas fa-map-signs me-2"></i>Route</th>
+    <td>
+        <a href="{{ path('route_showw', {'id': event.route.id}) }}">
+            {{ event.route.startLocation }} - {{ event.route.endLocation }}
+        </a>
+    </td>
+</tr>
                 <tr>
                     <th><i class="fas fa-tags me-2"></i>Catégorie</th>
                     <td>{{ event.category }}</td>

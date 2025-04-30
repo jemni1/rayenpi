@@ -167,6 +167,11 @@
             {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
             <div class="invalid-feedback">Location is required.</div>
         </div>
+        <div class="form-group">
+    <label class="form-label">Route<span class="form-required">*</span></label>
+    {{ form_widget(form.route, {'attr': {'class': 'form-control'}}) }}
+    <div class="invalid-feedback">Please select a route.</div>
+</div>
 
         <div class="form-group">
             <label class="form-label">Catégorie<span class="form-required">*</span></label>

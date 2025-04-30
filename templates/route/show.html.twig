@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la route{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center my-4">Détails de la route</h1>
+
+        <table class="table table-bordered">
+            <tr>
+                <th>ID</th>
+                <td>{{ route.id }}</td>
+            </tr>
+            <tr>
+                <th>Lieu de départ</th>
+                <td>{{ route.startLocation }}</td>
+            </tr>
+            <tr>
+                <th>Lieu d'arrivée</th>
+                <td>{{ route.endLocation }}</td>
+            </tr>
+            <tr>
+                <th>Points de passage</th>
+                <td>{{ route.waypoints ?: 'Non spécifié' }}</td>
+            </tr>
+            <tr>
+                <th>Durée estimée</th>
+                <td>{{ route.estimationDuration }} minutes</td>
+            </tr>
+            <tr>
+                <th>Type de véhicule</th>
+                <td>{{ route.vehiculeType }}</td>
+            </tr>
+        </table>
+
+        <div class="text-center">
+            <a href="{{ path('route_edit', {'id': route.id}) }}" class="btn btn-warning">Modifier</a>
+            <a href="{{ path('route_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ event.eventName }} - Détails</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        .description {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2ecc71;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .info-table td {
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .info-table td.label {
+            font-weight: bold;
+            color: #2c3e50;
+            width: 30%;
+        }
+
+        .route-box {
+            background-color: #f1f8e9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Détails de l'événement</h1>
+        <div class="subtitle">Généré le {{ "now"|date("d/m/Y à H:i") }}</div>
+
+        <div class="section">
+            <h2>{{ event.eventName }}</h2>
+            <table class="info-table">
+                <tr>
+                    <td class="label">Catégorie :</td>
+                    <td class="value">{{ event.category }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Date de début :</td>
+                    <td class="value">{{ event.startDate ? event.startDate|date('d/m/Y H:i') : 'Non spécifié' }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Date de fin :</td>
+                    <td class="value">{{ event.endDate ? event.endDate|date('d/m/Y H:i') : 'Non spécifié' }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Lieu :</td>
+                    <td class="value">{{ event.location }}</td>
+                </tr>
+            </table>
+
+            {% if event.eventDescription %}
+                <div class="description">
+                    {{ event.eventDescription }}
+                </div>
+            {% endif %}
+        </div>
+
+        {% if event.route %}
+        <div class="section">
+            <h2>Itinéraire</h2>
+            <div class="route-box">
+                <p><span class="label">Départ :</span> {{ event.route.startLocation }}</p>
+                <p><span class="label">Destination :</span> {{ event.route.endLocation }}</p>
+                <p><span class="label">Durée estimée :</span> {{ event.route.estimationDuration }} min</p>
+                <p><span class="label">Type de véhicule :</span> {{ event.route.vehiculeType }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            © {{ "now"|date("Y") }} - Rapport généré automatiquement.
+        </div>
+    </div>
+</body>
+</html>

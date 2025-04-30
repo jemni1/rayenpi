@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultat du calcul{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Résultat du calcul</h1>
+    
+    {% if usedDefault|default(false) %}
+        <div class="alert alert-warning">
+            Les données par défaut ont été utilisées car l'API n'a pas répondu.
+        </div>
+    {% endif %}
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Pour un trajet de {{ distance }} km en {{ transportModeName }}</h5>
+            
+            <div class="mb-3">
+                <p><strong>Émissions de CO₂:</strong> {{ emission|number_format(2) }} kg</p>
+                
+                {% if savedEmissions > 0 %}
+                    <div class="alert alert-success">
+                        Vous avez économisé <strong>{{ savedEmissions|number_format(2) }} kg</strong> de CO₂ 
+                        par rapport à un trajet en voiture essence!
+                    </div>
+                    <p>Merci de contribuer à la protection de l'environnement!</p>
+                {% elseif transportMode starts with 'car-' %}
+                    <div class="alert alert-info">
+                        Conseil : Pour réduire davantage votre empreinte, essayez le covoiturage ou les transports en commun.
+                    </div>
+                {% endif %}
+            </div>
+            
+            <a href="{{ path('carbon_footprint') }}" class="btn btn-primary">
+                Faire un nouveau calcul
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

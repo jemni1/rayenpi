@@ -15,10 +15,40 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Builder\BuilderInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Knp\Snappy\Pdf;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 #[Route('/events')]
 final class EventsController extends AbstractController
 {   
+    #[Route('/event/{id}/pdf', name: 'app_event_pdf', methods: ['GET'])]
+    public function downloadPdf(Events $event, Pdf $knpSnappyPdf): Response
+    {
+        // Rendre la vue Twig en HTML
+        $html = $this->renderView('events/pdf_template.html.twig', [
+            'event' => $event,
+        ]);
+
+        // Générer le PDF à partir du HTML
+        $pdf = $knpSnappyPdf->getOutputFromHtml($html);
+
+        // Créer une réponse HTTP avec le contenu PDF
+        $response = new Response($pdf);
+        
+        // Définir les en-têtes appropriés pour le téléchargement
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'event-'.$event->getId().'-details.pdf'
+        );
+        
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', $disposition);
+        
+        return $response;
+    }
+
+
+
     #[Route('/admin/events/{id}', name: 'admin_events_show', methods: ['GET'])]
     public function adminShow(Events $event, BuilderInterface $qrCodeBuilder): Response
     {
@@ -54,28 +84,32 @@ final class EventsController extends AbstractController
     public function adminIndex(Request $request, EventsRepository $eventsRepository, PaginatorInterface $paginator): Response
     {
         $searchQuery = $request->query->get('search', '');
-    
+        
         $query = $eventsRepository->createQueryBuilder('e');
-    
+        
         if (!empty($searchQuery)) {
             $query->where('e.eventName LIKE :search')
                   ->setParameter('search', '%' . $searchQuery . '%');
         }
-    
-        $query->orderBy('e.startDate', 'DESC');
-    
+        
         $pagination = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            10
+            10,
+            [
+                'defaultSortFieldName' => 'e.startDate',
+                'defaultSortDirection' => 'DESC',
+                'sortFieldAllowList' => ['e.id', 'e.eventName', 'e.startDate', 'e.endDate', 'e.location', 'e.category']
+            ]
         );
-    
+        
         if ($request->isXmlHttpRequest()) {
             return $this->render('adminevent/_table.html.twig', [
                 'events' => $pagination,
+                'searchQuery' => $searchQuery,
             ]);
         }
-    
+        
         return $this->render('adminevent/index.html.twig', [
             'events' => $pagination,
             'searchQuery' => $searchQuery,

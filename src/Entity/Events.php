@@ -67,6 +67,10 @@ class Events
     )]
     private ?string $category = null;
 
+    #[ORM\ManyToOne(inversedBy: 'relation')]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
+    private ?Route $route = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -161,6 +165,18 @@ public function setLongitude(?string $longitude): self
     public function setCategory(string $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getRoute(): ?Route
+    {
+        return $this->route;
+    }
+
+    public function setRoute(?Route $route): static
+    {
+        $this->route = $route;
 
         return $this;
     }

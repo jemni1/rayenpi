@@ -5,6 +5,47 @@
 {% block css %}
     {{ parent() }}
     <style>
+    /* Ajoutez ceci dans votre bloc CSS */
+.map-search-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    width: 300px;
+}
+
+.map-search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.search-results {
+    display: none;
+    background: white;
+    border-radius: 4px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.search-result-item {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+.map-marker-info {
+    font-size: 14px;
+    padding: 5px;
+}
         .event-form-container {
             background-color: #f8f9fa;
             border-radius: 8px;
@@ -299,6 +340,17 @@
         Please select a location on the map
     </div>
 </div>
+<div class="form-group">
+    <label class="form-label">
+        Route<span class="form-required">*</span>
+    </label>
+    {{ form_widget(form.route, {'attr': {'class': 'form-control' ~ (form.route.vars.valid ? '' : ' is-invalid')}}) }}
+    {% if not form.route.vars.valid %}
+        <div class="invalid-feedback">
+            {{ form_errors(form.route) }}
+        </div>
+    {% endif %}
+</div>
         
         <div class="form-group">
             <label class="form-label">
@@ -542,168 +594,168 @@
 
     // Fonction pour initialiser la carte
     function initMap() {
-        if (!mapContainer) {
-            console.error("Conteneur de carte introuvable");
+    if (!mapContainer) {
+        console.error("Conteneur de carte introuvable");
+        return;
+    }
+    
+    console.log("Initialisation de la carte...");
+    
+    // Créer la carte avec vue par défaut sur Tunis
+    map = L.map(mapContainer).setView([36.8065, 10.1815], 13);
+    
+    // Ajouter la couche de tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Ajouter le conteneur de recherche
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'map-search-container';
+    searchContainer.innerHTML = `
+        <input type="text" class="map-search-input" placeholder="Rechercher un lieu (ex: Tunis, Paris...)">
+        <div class="search-results"></div>
+    `;
+    mapContainer.appendChild(searchContainer);
+    
+    const searchInput = searchContainer.querySelector('.map-search-input');
+    const searchResults = searchContainer.querySelector('.search-results');
+    
+    // Gérer la recherche
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
             return;
         }
         
-        console.log("Initialisation de la carte...");
+        searchTimeout = setTimeout(() => {
+            searchLocation(query);
+        }, 500);
+    });
+    
+    // Rechercher un lieu avec Nominatim (OpenStreetMap)
+    function searchLocation(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
         
-        // Créer la carte avec vue par défaut sur Paris
-        map = L.map(mapContainer).setView([48.8566, 2.3522], 13);
-        
-        // Ajouter la couche de tuiles OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        // Ajouter le conteneur de recherche
-        const searchContainer = document.createElement('div');
-        searchContainer.className = 'map-search-container';
-        searchContainer.innerHTML = `
-            <input type="text" class="map-search-input" placeholder="Rechercher un lieu...">
-            <div class="search-results"></div>
-        `;
-        mapContainer.appendChild(searchContainer);
-        
-        const searchInput = searchContainer.querySelector('.map-search-input');
-        const searchResults = searchContainer.querySelector('.search-results');
-        
-        // Gérer la recherche
-        let searchTimeout;
-        
-        searchInput.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            
-            if (query.length < 3) {
-                searchResults.style.display = 'none';
-                return;
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
             }
-            
-            searchTimeout = setTimeout(() => {
-                searchLocation(query);
-            }, 500);
-        });
-        
-        // Rechercher un lieu avec Nominatim (OpenStreetMap)
-        function searchLocation(query) {
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
-            
-            fetch(url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    displaySearchResults(data);
-                } else {
-                    searchResults.innerHTML = '<div class="search-result-item">Aucun résultat trouvé</div>';
-                    searchResults.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                console.error('Erreur de recherche:', error);
-                searchResults.innerHTML = '<div class="search-result-item">Erreur lors de la recherche</div>';
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.length > 0) {
+                displaySearchResults(data);
+            } else {
+                searchResults.innerHTML = '<div class="search-result-item">Aucun résultat trouvé</div>';
                 searchResults.style.display = 'block';
-            });
-        }
-        
-        // Afficher les résultats de recherche
-        function displaySearchResults(results) {
-            searchResults.innerHTML = '';
-            
-            results.forEach(result => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.textContent = result.display_name;
-                
-                resultItem.addEventListener('click', function() {
-                    const lat = parseFloat(result.lat);
-                    const lng = parseFloat(result.lon);
-                    const address = result.display_name;
-                    
-                    setMarker(lat, lng, address);
-                    map.setView([lat, lng], 15);
-                    searchResults.style.display = 'none';
-                    searchInput.value = '';
-                });
-                
-                searchResults.appendChild(resultItem);
-            });
-            
+            }
+        })
+        .catch(error => {
+            console.error('Erreur de recherche:', error);
+            searchResults.innerHTML = '<div class="search-result-item">Erreur lors de la recherche</div>';
             searchResults.style.display = 'block';
-        }
+        });
+    }
+    
+    // Afficher les résultats de recherche
+    function displaySearchResults(results) {
+        searchResults.innerHTML = '';
         
-        // Gérer le clic sur la carte
-        map.on('click', function(e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
+        results.forEach(result => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            resultItem.textContent = result.display_name;
             
-            // Géocodage inverse pour obtenir l'adresse
-            reverseGeocode(lat, lng);
+            resultItem.addEventListener('click', function() {
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                const address = result.display_name;
+                
+                setMarker(lat, lng, address);
+                map.setView([lat, lng], 15);
+                searchResults.style.display = 'none';
+                searchInput.value = '';
+            });
+            
+            searchResults.appendChild(resultItem);
         });
         
-        // Géocodage inverse avec Nominatim
-        function reverseGeocode(lat, lng) {
-            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-            
-            fetch(url, {
-                headers: {
-                    'Accept': 'application/json',
-                    'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.display_name) {
-                    setMarker(lat, lng, data.display_name);
-                } else {
-                    setMarker(lat, lng, `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
-                }
-            })
-            .catch(error => {
-                console.error('Erreur de géocodage inverse:', error);
+        searchResults.style.display = 'block';
+    }
+    
+    // Gérer le clic sur la carte
+    map.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        
+        // Géocodage inverse pour obtenir l'adresse
+        reverseGeocode(lat, lng);
+    });
+    
+    // Géocodage inverse avec Nominatim
+    function reverseGeocode(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'EventsApp' // Remplacez par le nom de votre application
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.display_name) {
+                setMarker(lat, lng, data.display_name);
+            } else {
                 setMarker(lat, lng, `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Erreur de géocodage inverse:', error);
+            setMarker(lat, lng, `Latitude: ${lat.toFixed(6)}, Longitude: ${lng.toFixed(6)}`);
+        });
+    }
+    
+    // Définir le marqueur et mettre à jour les champs du formulaire
+    function setMarker(lat, lng, address) {
+        // Supprimer le marqueur existant
+        if (marker) {
+            map.removeLayer(marker);
         }
         
-        // Définir le marqueur et mettre à jour les champs du formulaire
-        function setMarker(lat, lng, address) {
-            // Supprimer le marqueur existant
-            if (marker) {
-                map.removeLayer(marker);
-            }
-            
-            // Ajouter un nouveau marqueur
-            marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(`<div class="map-marker-info">${address}</div>`).openPopup();
-            
-            // Mettre à jour les champs du formulaire
-            locationInput.value = address;
-            latitudeInput.value = lat;
-            longitudeInput.value = lng;
-            
-            // Effacer l'erreur s'il y en a
-            locationInput.classList.remove('is-invalid');
-            if (locationError) {
-                locationError.style.display = 'none';
-            }
-        }
+        // Ajouter un nouveau marqueur
+        marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`<div class="map-marker-info">${address}</div>`).openPopup();
         
-        // Vérifier si nous avons déjà des données de localisation
-        if (locationInput.value && latitudeInput.value && longitudeInput.value) {
-            const lat = parseFloat(latitudeInput.value);
-            const lng = parseFloat(longitudeInput.value);
-            if (!isNaN(lat) && !isNaN(lng)) {
-                setMarker(lat, lng, locationInput.value);
-                map.setView([lat, lng], 15);
-            }
+        // Mettre à jour les champs du formulaire
+        locationInput.value = address;
+        latitudeInput.value = lat;
+        longitudeInput.value = lng;
+        
+        // Effacer l'erreur s'il y en a
+        locationInput.classList.remove('is-invalid');
+        if (locationError) {
+            locationError.style.display = 'none';
         }
     }
+    
+    // Vérifier si nous avons déjà des données de localisation
+    if (locationInput.value && latitudeInput.value && longitudeInput.value) {
+        const lat = parseFloat(latitudeInput.value);
+        const lng = parseFloat(longitudeInput.value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            setMarker(lat, lng, locationInput.value);
+            map.setView([lat, lng], 15);
+        }
+    }
+}
     
     // Valider la localisation avant la soumission du formulaire
     function validateLocation() {

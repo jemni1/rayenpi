@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une nouvelle route{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="text-center my-4">Ajouter une nouvelle route</h1>
+
+        {{ form_start(form, {'attr': {'id': 'route-form', 'novalidate': 'novalidate'}}) }}
+            <div class="mb-3">
+                {{ form_label(form.startLocation) }}
+                {{ form_widget(form.startLocation, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le lieu de départ'}}) }}
+                {{ form_errors(form.startLocation) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.endLocation) }}
+                {{ form_widget(form.endLocation, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le lieu d\'arrivée'}}) }}
+                {{ form_errors(form.endLocation) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.waypoints) }}
+                {{ form_widget(form.waypoints, {'attr': {'class': 'form-control', 'placeholder': 'Entrez les points de passage (facultatif)'}}) }}
+                {{ form_errors(form.waypoints) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.estimationDuration) }}
+                {{ form_widget(form.estimationDuration, {'attr': {'class': 'form-control', 'placeholder': 'Durée estimée (en minutes)'}}) }}
+                {{ form_errors(form.estimationDuration) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.vehiculeType) }}
+                {{ form_widget(form.vehiculeType, {'attr': {'class': 'form-control', 'placeholder': 'Type de véhicule'}}) }}
+                {{ form_errors(form.vehiculeType) }}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success">Créer la route</button>
+                <a href="{{ path('route_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

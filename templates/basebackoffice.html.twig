@@ -147,136 +147,20 @@
 <nav class="mt-2">
   <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
-    <!-- Users -->
-    <li class="nav-item has-treeview">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-users"></i>
-        <p>Users <i class="right fas fa-angle-left"></i></p>
-      </a>
-      <ul class="nav nav-treeview">
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Travelers</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Drivers</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Orginizers</p>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <!-- Travel -->
-    <li class="nav-item has-treeview">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-plane"></i>
-        <p>Travel <i class="right fas fa-angle-left"></i></p>
-      </a>
-      <ul class="nav nav-treeview">
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Trip</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Itinerary</p>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-
-    <!-- Accomodations -->
-    <li class="nav-item">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-hotel"></i>
-        <p>Accomodation <i class="right fas fa-angle-left"></i></p>
-      </a>
-       <ul class="nav nav-treeview">
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Hotels</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Bookings</p>
-          </a>
-        </li>
-      </ul>
-    </li>
-
-    <!-- Reservations -->
-    <li class="nav-item">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-book"></i>
-        <p>Transportation  <i class="right fas fa-angle-left"></i></p>
-      </a>
-      <ul class="nav nav-treeview">
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Reservations</p>
-          </a>
-        </li>
-      <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Transports</p>
-          </a>
-        </li>
-      </ul>
-    </li>
 
     <!-- Events -->
     <li class="nav-item">
-      <a href="#" class="nav-link">
+      <a href="{{ path('route_indexx') }}" class="nav-link">
         <i class="nav-icon fas fa-calendar-alt"></i>
-        <p>Events</p>
+        <p>Routes</p>
       </a>
     </li>
 
-
-    <!-- Social Media -->
-    <li class="nav-item">
-      <a href="#" class="nav-link">
-        <i class="nav-icon fas fa-hashtag"></i>
-        <p>Social Media <i class="right fas fa-angle-left"></i> </p>
-      </a>
-      <ul class="nav nav-treeview">
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Posts</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="far fa-circle nav-icon"></i>
-            <p>Comments</p>
-          </a>
-        </li>
-      </ul>
-    </li>
 
      <li class="nav-item">
-      <a href="#" class="nav-link">
+      <a href="{{ path('admin_events_index') }}" class="nav-link">
         <i class="nav-icon fas fa-comment"></i>
-        <p>Feedbacks </p>
+        <p>Events </p>
       </a>
     </li>
 
