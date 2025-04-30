@@ -1,41 +1,87 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de la route{% endblock %}
+{% block title %}Route Details | EcoRoute{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1 class="text-center my-4">Détails de la route</h1>
-
-        <table class="table table-bordered">
-            <tr>
-                <th>ID</th>
-                <td>{{ route.id }}</td>
-            </tr>
-            <tr>
-                <th>Lieu de départ</th>
-                <td>{{ route.startLocation }}</td>
-            </tr>
-            <tr>
-                <th>Lieu d'arrivée</th>
-                <td>{{ route.endLocation }}</td>
-            </tr>
-            <tr>
-                <th>Points de passage</th>
-                <td>{{ route.waypoints ?: 'Non spécifié' }}</td>
-            </tr>
-            <tr>
-                <th>Durée estimée</th>
-                <td>{{ route.estimationDuration }} minutes</td>
-            </tr>
-            <tr>
-                <th>Type de véhicule</th>
-                <td>{{ route.vehiculeType }}</td>
-            </tr>
-        </table>
-
-        <div class="text-center">
-            <a href="{{ path('route_edit', {'id': route.id}) }}" class="btn btn-warning">Modifier</a>
-            <a href="{{ path('route_index') }}" class="btn btn-secondary">Retour à la liste</a>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class="fas fa-route me-2"></i> Route Details</h2>
+                        <a href="{{ path('route_index') }}" class="btn btn-sm btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <tbody>
+                                <tr>
+                                    <th class="w-25 bg-light">ID</th>
+                                    <td>{{ route.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Starting Point</th>
+                                    <td>
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                        {{ route.startLocation }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Destination</th>
+                                    <td>
+                                        <i class="fas fa-flag-checkered text-success me-2"></i>
+                                        {{ route.endLocation }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Waypoints</th>
+                                    <td>
+                                        {% if route.waypoints %}
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for waypoint in route.waypoints|split(',') %}
+                                                    <span class="badge bg-info text-dark">
+                                                        <i class="fas fa-dot-circle me-1"></i> {{ waypoint|trim }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">None specified</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Estimated Duration</th>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-clock me-1"></i> {{ route.estimationDuration }} minutes
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Vehicle Type</th>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-car me-1"></i> {{ route.vehiculeType }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ path('route_edit', {'id': route.id}) }}" class="btn btn-warning px-4 py-2">
+                            <i class="fas fa-edit me-2"></i> Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

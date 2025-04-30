@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Calculateur d'empreinte carbone{% endblock %}
+{% block title %}Carbon Footprint Calculator{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
-    <h1 class="mb-4">Calculateur d'empreinte carbone</h1>
+    <h1 class="mb-4">Carbon Footprint Calculator</h1>
     
     {% for message in app.flashes('error') %}
         <div class="alert alert-danger">{{ message }}</div>
@@ -14,9 +14,9 @@
         <div class="card-body">
             <form method="post" action="{{ path('carbon_footprint_calculate') }}">
                 <div class="mb-3">
-                    <label for="transport_mode" class="form-label">Mode de transport:</label>
+                    <label for="transport_mode" class="form-label">Transport Mode:</label>
                     <select class="form-select" id="transport_mode" name="transport_mode" required>
-                        <option value="">Sélectionnez un mode de transport</option>
+                        <option value="">Select a transport mode</option>
                         {% for key, mode in transportModes %}
                             <option value="{{ key }}">{{ mode }}</option>
                         {% endfor %}
@@ -28,7 +28,7 @@
                     <input type="number" step="0.1" min="0.1" class="form-control" id="distance" name="distance" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Calculer</button>
+                <button type="submit" class="btn btn-primary">Calculate</button>
             </form>
         </div>
     </div>

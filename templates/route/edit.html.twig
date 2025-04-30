@@ -1,178 +1,119 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier la route{% endblock %}
+{% block title %}Edit Route | EcoRoute{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1 class="text-center my-4">Modifier la route</h1>
-
-        {{ form_start(form, {'attr': {'id': 'route-form', 'novalidate': 'novalidate'}}) }}
-            <div class="mb-3">
-                {{ form_label(form.startLocation) }}
-                {{ form_widget(form.startLocation, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le lieu de départ'}}) }}
-                <small class="text-danger error-message" id="startLocation-error"></small>
-                {{ form_errors(form.startLocation) }}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class="fas fa-route me-2"></i> Edit Route</h2>
+                        <a href="{{ path('route_index') }}" class="btn btn-sm btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'id': 'route-form', 'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+                    
+                    <div class="row g-3">
+                        <!-- Start Location -->
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.startLocation, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.startLocation.vars.valid ? '' : ' is-invalid'),
+                                        'placeholder': ' ',
+                                        'id': 'startLocation'
+                                    }
+                                }) }}
+                                {{ form_label(form.startLocation, 'Starting Point', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.startLocation)|striptags }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- End Location -->
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.endLocation, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.endLocation.vars.valid ? '' : ' is-invalid'),
+                                        'placeholder': ' ',
+                                        'id': 'endLocation'
+                                    }
+                                }) }}
+                                {{ form_label(form.endLocation, 'Destination', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.endLocation)|striptags }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Waypoints -->
+                        <div class="col-12">
+                            <div class="form-floating">
+                                {{ form_widget(form.waypoints, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': ' ',
+                                        'id': 'waypoints',
+                                        'style': 'height: 100px'
+                                    }
+                                }) }}
+                                {{ form_label(form.waypoints, 'Waypoints (optional)', {'label_attr': {'class': 'form-label'}}) }}
+                            </div>
+                            <small class="text-muted">Separate multiple waypoints with commas</small>
+                        </div>
+                        
+                        <!-- Duration & Vehicle Type -->
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.estimationDuration, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.estimationDuration.vars.valid ? '' : ' is-invalid'),
+                                        'placeholder': ' ',
+                                        'id': 'estimationDuration'
+                                    }
+                                }) }}
+                                {{ form_label(form.estimationDuration, 'Estimated Duration (min)', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.estimationDuration)|striptags }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.vehiculeType, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form.vehiculeType.vars.valid ? '' : ' is-invalid'),
+                                        'placeholder': ' ',
+                                        'id': 'vehiculeType'
+                                    }
+                                }) }}
+                                {{ form_label(form.vehiculeType, 'Vehicle Type', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.vehiculeType)|striptags }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2">
+                            <i class="fas fa-save me-2"></i> Update Route
+                        </button>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
             </div>
-
-            <div class="mb-3">
-                {{ form_label(form.endLocation) }}
-                {{ form_widget(form.endLocation, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le lieu d\'arrivée'}}) }}
-                <small class="text-danger error-message" id="endLocation-error"></small>
-                {{ form_errors(form.endLocation) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.waypoints) }}
-                {{ form_widget(form.waypoints, {'attr': {'class': 'form-control', 'placeholder': 'Entrez les points de passage (facultatif)'}}) }}
-                <small class="text-danger error-message" id="waypoints-error"></small>
-                {{ form_errors(form.waypoints) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.estimationDuration) }}
-                {{ form_widget(form.estimationDuration, {'attr': {'class': 'form-control', 'placeholder': 'Durée estimée (en minutes)'}}) }}
-                <small class="text-danger error-message" id="estimationDuration-error"></small>
-                {{ form_errors(form.estimationDuration) }}
-            </div>
-
-            <div class="mb-3">
-                {{ form_label(form.vehiculeType) }}
-                {{ form_widget(form.vehiculeType, {'attr': {'class': 'form-control', 'placeholder': 'Type de véhicule'}}) }}
-                <small class="text-danger error-message" id="vehiculeType-error"></small>
-                {{ form_errors(form.vehiculeType) }}
-            </div>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-warning">Modifier la route</button>
-                <a href="{{ path('route_index') }}" class="btn btn-secondary">Retour à la liste</a>
-            </div>
-        {{ form_end(form) }}
+        </div>
     </div>
-{% endblock %}
-
-{% block js %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('route-form');
-            
-            // Réinitialiser tous les messages d'erreur
-            function resetErrors() {
-                const errorElements = document.querySelectorAll('.error-message');
-                errorElements.forEach(element => {
-                    element.textContent = '';
-                });
-                
-                // Réinitialiser les styles des champs
-                const formInputs = form.querySelectorAll('input, select, textarea');
-                formInputs.forEach(input => {
-                    input.classList.remove('is-invalid');
-                    input.classList.remove('is-valid');
-                });
-            }
-            
-            // Valider le formulaire
-            function validateForm() {
-                resetErrors();
-                let isValid = true;
-                
-                // Récupérer les champs
-                const startLocation = form.querySelector('[name$="[startLocation]"]');
-                const endLocation = form.querySelector('[name$="[endLocation]"]');
-                const estimationDuration = form.querySelector('[name$="[estimationDuration]"]');
-                const vehiculeType = form.querySelector('[name$="[vehiculeType]"]');
-                
-                // Valider le lieu de départ
-                if (!startLocation.value.trim()) {
-                    document.getElementById('startLocation-error').textContent = 'Le lieu de départ est obligatoire.';
-                    startLocation.classList.add('is-invalid');
-                    isValid = false;
-                } else if (startLocation.value.trim().length < 3) {
-                    document.getElementById('startLocation-error').textContent = 'Le lieu de départ doit contenir au moins 3 caractères.';
-                    startLocation.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    startLocation.classList.add('is-valid');
-                }
-                
-                // Valider le lieu d'arrivée
-                if (!endLocation.value.trim()) {
-                    document.getElementById('endLocation-error').textContent = 'Le lieu d\'arrivée est obligatoire.';
-                    endLocation.classList.add('is-invalid');
-                    isValid = false;
-                } else if (endLocation.value.trim().length < 3) {
-                    document.getElementById('endLocation-error').textContent = 'Le lieu d\'arrivée doit contenir au moins 3 caractères.';
-                    endLocation.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    endLocation.classList.add('is-valid');
-                }
-                
-                // Valider la durée estimée
-                if (!estimationDuration.value.trim()) {
-                    document.getElementById('estimationDuration-error').textContent = 'La durée estimée est obligatoire.';
-                    estimationDuration.classList.add('is-invalid');
-                    isValid = false;
-                } else if (isNaN(estimationDuration.value) || parseInt(estimationDuration.value) <= 0) {
-                    document.getElementById('estimationDuration-error').textContent = 'La durée doit être un nombre positif.';
-                    estimationDuration.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    estimationDuration.classList.add('is-valid');
-                }
-                
-                // Valider le type de véhicule
-                if (!vehiculeType.value.trim()) {
-                    document.getElementById('vehiculeType-error').textContent = 'Le type de véhicule est obligatoire.';
-                    vehiculeType.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    vehiculeType.classList.add('is-valid');
-                }
-                
-                return isValid;
-            }
-            
-            // Événement de soumission du formulaire
-            form.addEventListener('submit', function(event) {
-                if (!validateForm()) {
-                    event.preventDefault();
-                    // Faire défiler jusqu'au premier champ avec erreur
-                    const firstError = document.querySelector('.is-invalid');
-                    if (firstError) {
-                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstError.focus();
-                    }
-                }
-            });
-            
-            // Validation en temps réel lors de la saisie
-            const formInputs = form.querySelectorAll('input, select, textarea');
-            formInputs.forEach(input => {
-                input.addEventListener('blur', function() {
-                    // Réinitialiser uniquement ce champ
-                    this.classList.remove('is-invalid');
-                    this.classList.remove('is-valid');
-                    
-                    const fieldName = this.name.match(/\[([^\]]+)\]$/)[1];
-                    const errorElement = document.getElementById(fieldName + '-error');
-                    errorElement.textContent = '';
-                    
-                    // Valider ce champ spécifique
-                    if (!this.value.trim() && this.name.indexOf('waypoints') === -1) {
-                        errorElement.textContent = 'Ce champ est obligatoire.';
-                        this.classList.add('is-invalid');
-                    } else if (fieldName === 'estimationDuration' && (isNaN(this.value) || parseInt(this.value) <= 0)) {
-                        errorElement.textContent = 'La durée doit être un nombre positif.';
-                        this.classList.add('is-invalid');
-                    } else if ((fieldName === 'startLocation' || fieldName === 'endLocation') && this.value.trim().length < 3) {
-                        errorElement.textContent = 'Ce champ doit contenir au moins 3 caractères.';
-                        this.classList.add('is-invalid');
-                    } else if (this.value.trim()) {
-                        this.classList.add('is-valid');
-                    }
-                });
-            });
-        });
-    </script>
+</div>
 {% endblock %}

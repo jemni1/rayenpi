@@ -2,143 +2,243 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{{ event.eventName }} - Détails</title>
+    <title>{{ event.eventName }} - Event Details</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Import direct des polices au lieu de Google Fonts pour meilleure compatibilité PDF -->
     <style>
+        /* Variables de couleurs - simplifiées pour compatibilité PDF */
+        :root {
+            --primary: #1b5e20;
+            --secondary: #2e7d32;
+            --accent: #43a047;
+            --light-accent: #c8e6c9;
+            --very-light-accent: #e8f5e9;
+            --warm-accent: #81c784;
+            --cool-accent: #4caf50;
+            --light: #f1f8e9;
+            --dark: #1b5e20;
+            --gray: #558b2f;
+            --border-radius: 12px;
+        }
+
+        /* Style de base */
         body {
-            font-family: Arial, sans-serif;
-            color: #333;
-            background-color: #f4f4f4;
+            font-family: 'Helvetica', 'Arial', sans-serif; /* Polices web-safe pour PDF */
+            color: #424242;
+            background-color: #f1f8e9;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 750px;
-            margin: auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.1);
+            border-top: 5px solid #1b5e20;
+            border-left: 1px solid #c8e6c9;
+            border-right: 1px solid #c8e6c9;
+            border-bottom: 1px solid #c8e6c9;
         }
 
         h1, h2 {
-            color: #2c3e50;
+            color: #1b5e20;
+            font-weight: 600;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 2.2rem;
+            padding-bottom: 5px;
+            /* Suppression des dégradés pour compatibilité PDF */
         }
 
         .subtitle {
             text-align: center;
-            font-size: 13px;
-            color: #777;
-            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: #558b2f;
+            margin-bottom: 40px;
         }
 
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #c8e6c9;
+            position: relative;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background-color: #43a047; /* Couleur unie au lieu de dégradé */
         }
 
         .label {
-            font-weight: bold;
-            color: #555;
-            margin-right: 5px;
+            font-weight: 500;
+            color: #2e7d32;
+            display: inline-block;
+            min-width: 120px;
         }
 
         .value {
-            color: #333;
+            color: #424242;
         }
 
         .description {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-left: 4px solid #2ecc71;
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-left: 4px solid #43a047;
             border-radius: 4px;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            position: relative;
         }
 
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .info-table td {
-            padding: 8px;
+            padding: 12px 8px;
             vertical-align: top;
+            border-bottom: 1px solid #e8f5e9;
+        }
+
+        .info-table tr:last-child td {
+            border-bottom: none;
         }
 
         .info-table td.label {
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 500;
+            color: #2e7d32;
             width: 30%;
         }
 
         .route-box {
-            background-color: #f1f8e9;
-            padding: 15px;
-            border-radius: 5px;
+            background-color: #e8f5e9; /* Couleur unie au lieu de dégradé */
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #c8e6c9;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .route-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #1b5e20; /* Couleur unie au lieu de dégradé */
+        }
+
+        .route-box p {
+            margin: 8px 0;
+            position: relative;
+            z-index: 1;
+            padding-left: 10px;
         }
 
         .footer {
             text-align: center;
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 40px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
+            font-size: 0.8rem;
+            color: #558b2f;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #c8e6c9;
+            padding: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: #4caf50;
+            color: white;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .highlight {
+            background-color: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1b5e20;
+            font-weight: 500;
+        }
+
+        .date-highlight {
+            color: #1b5e20;
+            font-weight: 500;
+        }
+
+        h2 {
+            border-bottom: 2px solid #c8e6c9;
+            padding-bottom: 5px;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Détails de l'événement</h1>
-        <div class="subtitle">Généré le {{ "now"|date("d/m/Y à H:i") }}</div>
+        <h1>Event Details</h1>
+        <div class="subtitle">Generated on <span class="date-highlight">{{ now|date("m/d/Y \\a\\t H:i") }}</span></div>
 
         <div class="section">
-            <h2>{{ event.eventName }}</h2>
+            <h2>{{ event.eventName }} {% if event.category %}<span class="badge">{{ event.category }}</span>{% endif %}</h2>
             <table class="info-table">
                 <tr>
-                    <td class="label">Catégorie :</td>
-                    <td class="value">{{ event.category }}</td>
+                    <td class="label">Start Date:</td>
+                    <td class="value"><span class="date-highlight">{{ event.startDate ? event.startDate|date('m/d/Y H:i') : 'Not specified' }}</span></td>
                 </tr>
                 <tr>
-                    <td class="label">Date de début :</td>
-                    <td class="value">{{ event.startDate ? event.startDate|date('d/m/Y H:i') : 'Non spécifié' }}</td>
+                    <td class="label">End Date:</td>
+                    <td class="value"><span class="date-highlight">{{ event.endDate ? event.endDate|date('m/d/Y H:i') : 'Not specified' }}</span></td>
                 </tr>
                 <tr>
-                    <td class="label">Date de fin :</td>
-                    <td class="value">{{ event.endDate ? event.endDate|date('d/m/Y H:i') : 'Non spécifié' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Lieu :</td>
-                    <td class="value">{{ event.location }}</td>
+                    <td class="label">Location:</td>
+                    <td class="value">{{ event.location }} <span class="highlight">on site</span></td>
                 </tr>
             </table>
 
-            {% if event.eventDescription %}
+            {% if event.eventDescription is defined and event.eventDescription %}
                 <div class="description">
                     {{ event.eventDescription }}
                 </div>
             {% endif %}
         </div>
 
-        {% if event.route %}
+        {% if event.route is defined and event.route %}
         <div class="section">
-            <h2>Itinéraire</h2>
+            <h2>Route Information</h2>
             <div class="route-box">
-                <p><span class="label">Départ :</span> {{ event.route.startLocation }}</p>
-                <p><span class="label">Destination :</span> {{ event.route.endLocation }}</p>
-                <p><span class="label">Durée estimée :</span> {{ event.route.estimationDuration }} min</p>
-                <p><span class="label">Type de véhicule :</span> {{ event.route.vehiculeType }}</p>
+                <p><span class="label">Departure:</span> {{ event.route.startLocation }}</p>
+                <p><span class="label">Destination:</span> {{ event.route.endLocation }}</p>
+                <p><span class="label">Estimated Duration:</span> <span class="highlight">{{ event.route.estimationDuration }} minutes</span></p>
+                <p><span class="label">Vehicle Type:</span> {{ event.route.vehiculeType }}</p>
             </div>
         </div>
         {% endif %}
 
         <div class="footer">
-            © {{ "now"|date("Y") }} - Rapport généré automatiquement.
+            © {{ "now"|date("Y") }} - Automatically generated report • <span style="color: #43a047">Green Events System</span>
         </div>
     </div>
 </body>

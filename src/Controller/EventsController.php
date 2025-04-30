@@ -24,14 +24,34 @@ final class EventsController extends AbstractController
     #[Route('/event/{id}/pdf', name: 'app_event_pdf', methods: ['GET'])]
     public function downloadPdf(Events $event, Pdf $knpSnappyPdf): Response
     {
+        // Obtenir la date actuelle pour l'affichage dans le template
+        $now = new \DateTime();
+        
         // Rendre la vue Twig en HTML
         $html = $this->renderView('events/pdf_template.html.twig', [
             'event' => $event,
+            'now' => $now,
         ]);
-
-        // Générer le PDF à partir du HTML
-        $pdf = $knpSnappyPdf->getOutputFromHtml($html);
-
+    
+        // Configuration des options pour améliorer le rendu
+        $options = [
+            'enable-local-file-access' => true,
+            'encoding' => 'UTF-8',
+            'images' => true,
+            'javascript-delay' => 1000, // Attendre 1s pour le chargement des éléments
+            'enable-javascript' => true,
+            'no-stop-slow-scripts' => true,
+            'margin-top' => 10,
+            'margin-right' => 10,
+            'margin-bottom' => 10,
+            'margin-left' => 10,
+            'user-style-sheet' => null, // Si vous avez un CSS séparé
+            'viewport-size' => '1280x1024', // Taille pour le rendu
+        ];
+    
+        // Générer le PDF à partir du HTML avec les options
+        $pdf = $knpSnappyPdf->getOutputFromHtml($html, $options);
+    
         // Créer une réponse HTTP avec le contenu PDF
         $response = new Response($pdf);
         
